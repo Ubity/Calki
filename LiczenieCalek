@@ -1,0 +1,121 @@
+// Liczenie calki oznaczonej 3 metodami
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+//Funkcja, ktorej liczymy calke
+double f(double x)
+{
+	return 2*sin(x+5)-10;
+}
+
+// Funckje do zamiany miejscami xp z xk gdy xp>xk
+double swap(double x, double y)
+{
+	double tmp;
+	
+	tmp=x;
+	x=y;
+	y=tmp;
+	
+	return x,y;
+}
+
+//Funkcja liczaca minimalna i maxymalna wartosc funkcji
+void maxImin(double x, double y, double *ymin, double *ymax)
+{
+	double i;
+	*ymax=*ymin=f(x);
+	for(i=x;i<=y;i+=0.0001)
+	{
+		if(f(i)>*ymax)  *ymax=f(i);
+		else if(f(i)<*ymin)  *ymin=f(i);
+	}
+	
+}
+
+//Generowanie liczb losowych
+double genLiczb(double max, double min)
+{
+	double zakres = max - min;
+	double dzielenie = RAND_MAX/zakres;
+	return max - rand()/dzielenie;
+}
+// Liczenie calek metoda Monte Carlo (MC)
+double metodaMC(double xp,double xk)
+{
+	double pole,traf=0,ymax,ymin,calka,N=10000000,i,xo,yo;
+	
+	maxImin(xp,xk,&ymin,&ymax);
+	
+	if(ymax>0 && ymin>0) ymin=0;
+	else if(ymax<0 && ymin<0) ymax=0;
+	pole = (ymax-ymin)*(xk-xp);
+	
+		
+	for(i=0;i<N;i++)
+	{
+		xo=genLiczb(xk,xp);
+		yo=genLiczb(ymax,ymin);
+		
+		if( yo>0 && yo<=f(xo) ) traf++;
+		 else if( yo<0 && yo>=f(xo) ) traf--;
+	}
+	
+	printf("Min:%lf\nMax:%lf\nLiczba trafien:%lf\nPole prostokatu:%lf\n",ymin,ymax,traf,pole);
+	
+	return 	calka=traf*pole/N;
+}
+
+//Liczenie calek metoda Prostokatow
+double metodaProstokatow(double x, double y, double dx)
+{
+	double i,wynik=0;
+	
+	for(i=x;i<=y;i+=dx)
+	{
+		wynik+=f(i)*dx;
+		
+	}
+	return wynik;
+}
+
+//Liczenie calek metoda Trapezow
+double metodaTrapezow(double x, double y, double dx)
+{
+	double i,wynik=0;
+	wynik+=f(x)/2.0*dx + f(y)/2.0*dx;
+	for(i=x+dx;i<=y;i+=dx)
+	{
+		wynik+=f(i)*dx;
+	}
+	return wynik;
+}
+int main ()
+{
+	double xp,xk,wynik,ymin,ymax,krok;
+	printf("Podaj poczatek przedzialu calkowania:");
+	scanf(" %lf", &xp);
+	printf("\n");
+	printf("Podaj koniec przedzialu calkowania:");
+	scanf(" %lf", &xk);
+	printf("\n");
+	printf("Podaj krok:");
+	scanf(" %lf", &krok);
+	printf("\n");
+	
+	if(xp>xk) swap(xp,xk);
+	
+	printf("===================================\nWyniki dla metody Monte Carlo:\n");
+	wynik=metodaMC(xp,xk);
+	printf("Calka wynosi: %lf\n===================================\n", wynik);
+	printf("Wynik dla metody Prostokatow:\n");
+	wynik=metodaProstokatow(xp,xk,krok);
+	printf("Calka wynosi: %lf\n===================================\n", wynik);
+	printf("Wynik dla metody Trapezow:\n");
+	wynik=metodaTrapezow(xp,xk,krok);
+	printf("Calka wynosi: %lf\n===================================\n", wynik);
+	
+	return 0;
+}
